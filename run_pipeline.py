@@ -16,8 +16,10 @@
 import argparse
 import json
 import logging
+import os
 import sys
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -29,7 +31,8 @@ from track_preprocessor import load_frames
 from vlm_inspector import QwenVLBackend, TrackInspector
 from investigation_tools import ToolExecutor
 from llm_investigator import LLMInvestigator
-from track_corrector import TrackCorrector, dump_mot_result
+from track_corrector import TrackCorrector, dump_mot_result, clone_tracks
+from stage_visualizer import visualize_stage1, visualize_stage2, visualize_stage3
 
 logging.basicConfig(
     level=logging.INFO,
@@ -134,6 +137,7 @@ def run_single_sequence(
     backend: QwenVLBackend,
     args,
     output_path: str,
+    viz_dir: Optional[str] = None,
 ) -> dict:
     # ── 阶段一：VLM 巡检 ──
     stage1_meta = {}
@@ -184,6 +188,18 @@ def run_single_sequence(
             "ok_count": len(s1_report.ok_tracks),
         }
 
+    if viz_dir:
+        try:
+            visualize_stage1(
+                seq_name=seq_name,
+                suspicions=suspicions,
+                tracks=tracks,
+                frames=frames,
+                out_dir=viz_dir,
+            )
+        except Exception as e:
+            logger.warning(f"[{seq_name}] 阶段一可视化失败：{e}")
+
     final_payload = {
         "sequence": seq_name,
         "stage1": stage1_meta,
@@ -204,12 +220,24 @@ def run_single_sequence(
     investigator = LLMInvestigator(backend=backend, executor=executor)
     inv_report = investigator.investigate_all(suspicions, tracks, frames)
     final_payload["stage2"] = inv_report.to_dict()
+    if viz_dir:
+        try:
+            visualize_stage2(
+                seq_name=seq_name,
+                investigations=inv_report.investigations,
+                tracks=tracks,
+                frames=frames,
+                out_dir=viz_dir,
+            )
+        except Exception as e:
+            logger.warning(f"[{seq_name}] 阶段二可视化失败：{e}")
 
     # ── 阶段三：轨迹修正（可选） ──
     if args.enable_stage3:
         logger.info("=" * 40)
         logger.info(f"[{seq_name}] 阶段三：轨迹修正")
         logger.info("=" * 40)
+        tracks_before_stage3 = clone_tracks(tracks)
         corrector = TrackCorrector(
             frames=frames,
             backend=backend,
@@ -232,11 +260,89 @@ def run_single_sequence(
             "validation_enabled": (not args.stage3_no_verify),
             "min_confidence": args.stage3_min_confidence,
         }
+        if viz_dir:
+            try:
+                visualize_stage3(
+                    seq_name=seq_name,
+                    actions=c_report.actions,
+                    tracks_before=tracks_before_stage3,
+                    tracks_after=corrected_tracks,
+                    frames=frames,
+                    out_dir=viz_dir,
+                )
+            except Exception as e:
+                logger.warning(f"[{seq_name}] 阶段三可视化失败：{e}")
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(final_payload, f, ensure_ascii=False, indent=2)
     logger.info(f"[{seq_name}] 报告已保存至 {output_path}")
     return final_payload
+
+
+def _parse_gpu_devices(gpu_devices: str) -> List[str]:
+    if not gpu_devices:
+        return []
+    out = []
+    for item in gpu_devices.split(","):
+        item = item.strip()
+        if item:
+            out.append(item)
+    return out
+
+
+def _process_sequence_worker(task: dict) -> dict:
+    """
+    多进程 worker：每个进程独立加载模型并处理一个序列。
+    task 字段：
+      - seq_name, frames_dir, mot_file, seq_output
+      - args_dict（run_pipeline 参数 dict）
+      - gpu_device（如 "0"/"1"）
+      - viz_dir（可视化输出根目录）
+    """
+    seq_name = task["seq_name"]
+    frames_dir = task["frames_dir"]
+    mot_file = task["mot_file"]
+    seq_output = task["seq_output"]
+    args_dict = task["args_dict"]
+    gpu_device = task.get("gpu_device", "")
+    viz_dir = task.get("viz_dir", None)
+
+    if gpu_device != "":
+        # 子进程内固定可见 GPU，避免多进程争抢同卡
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_device)
+        device = "cuda:0"
+    else:
+        device = "cuda"
+
+    backend = QwenVLBackend(model_name=args_dict["model"], use_ollama=False, device=device)
+    frames = load_frames(frames_dir)
+    tracks = load_mot_result(mot_file)
+
+    seq_args = argparse.Namespace(**args_dict)
+    if args_dict.get("corrected_mot"):
+        corr_root = Path(args_dict["corrected_mot"])
+        corr_root.mkdir(parents=True, exist_ok=True)
+        seq_args.corrected_mot = str(corr_root / f"{seq_name}.txt")
+    else:
+        seq_args.corrected_mot = None
+
+    result = run_single_sequence(
+        seq_name=seq_name,
+        frames=frames,
+        tracks=tracks,
+        backend=backend,
+        args=seq_args,
+        output_path=seq_output,
+        viz_dir=viz_dir,
+    )
+    return {
+        "sequence": seq_name,
+        "frames_dir": frames_dir,
+        "mot_file": mot_file,
+        "report_path": seq_output,
+        "stage1_suspicious": result.get("stage1", {}).get("suspicious_count", 0),
+        "stage2_count": len(result.get("stage2", {}).get("investigations", [])),
+    }
 
 
 # ──────────────────────────────────────────────
@@ -268,14 +374,17 @@ def main():
                         help="关闭阶段三局部 VLM 验证（更快，但更激进）")
     parser.add_argument("--corrected-mot", type=str, default=None,
                         help="阶段三修正后的 MOT 输出路径（默认 output 同名 *_corrected.txt）")
+    parser.add_argument("--num-workers", type=int, default=1,
+                        help="多序列并行进程数（仅 batch 模式生效，建议与 GPU 数一致）")
+    parser.add_argument("--gpu-devices", type=str, default="",
+                        help="逗号分隔 GPU 列表，如 0,1,2,3；为空则不限制可见 GPU")
+    parser.add_argument("--viz-dir", type=str, default=None,
+                        help="可视化输出目录（按 seq_name/stage1|2|3 导出 jpg）")
     args = parser.parse_args()
     batch_mode = bool(args.frames_root and args.mot_root)
     if batch_mode and args.stage1_json:
         parser.error("多序列模式暂不支持 --stage1-json，请对每个序列单独运行或关闭该参数")
 
-    # ── 模型加载（共用一个后端） ──
-    logger.info(f"加载模型：{args.model}")
-    backend = QwenVLBackend(model_name=args.model, use_ollama=False, device="cuda")
     if batch_mode:
         pairs = resolve_batch_pairs(args.frames_root, args.mot_root, args.seq_glob)
         if not pairs:
@@ -290,42 +399,81 @@ def main():
             "frames_root": args.frames_root,
             "mot_root": args.mot_root,
             "sequence_count": len(pairs),
+            "num_workers": args.num_workers,
+            "gpu_devices": _parse_gpu_devices(args.gpu_devices),
             "sequences": [],
         }
-        logger.info(f"多序列模式：共 {len(pairs)} 个序列")
-        for idx, (seq_name, frames_dir, mot_file) in enumerate(pairs, start=1):
-            logger.info(f"[{idx}/{len(pairs)}] 处理序列 {seq_name}")
-            frames = load_frames(frames_dir)
-            tracks = load_mot_result(mot_file)
-            seq_output = str(seq_out_dir / f"{seq_name}.json")
-            seq_args = argparse.Namespace(**vars(args))
-            if args.corrected_mot:
-                corr_root = Path(args.corrected_mot)
-                corr_root.mkdir(parents=True, exist_ok=True)
-                seq_args.corrected_mot = str(corr_root / f"{seq_name}.txt")
-            else:
-                seq_args.corrected_mot = None
-            result = run_single_sequence(
-                seq_name=seq_name,
-                frames=frames,
-                tracks=tracks,
-                backend=backend,
-                args=seq_args,
-                output_path=seq_output,
-            )
-            aggregate["sequences"].append({
-                "sequence": seq_name,
-                "frames_dir": frames_dir,
-                "mot_file": mot_file,
-                "report_path": seq_output,
-                "stage1_suspicious": result.get("stage1", {}).get("suspicious_count", 0),
-                "stage2_count": len(result.get("stage2", {}).get("investigations", [])),
-            })
+        logger.info(f"多序列模式：共 {len(pairs)} 个序列，num_workers={args.num_workers}")
+
+        if args.num_workers <= 1:
+            logger.info(f"加载模型：{args.model}")
+            backend = QwenVLBackend(model_name=args.model, use_ollama=False, device="cuda")
+            for idx, (seq_name, frames_dir, mot_file) in enumerate(pairs, start=1):
+                logger.info(f"[{idx}/{len(pairs)}] 处理序列 {seq_name}")
+                frames = load_frames(frames_dir)
+                tracks = load_mot_result(mot_file)
+                seq_output = str(seq_out_dir / f"{seq_name}.json")
+                seq_args = argparse.Namespace(**vars(args))
+                if args.corrected_mot:
+                    corr_root = Path(args.corrected_mot)
+                    corr_root.mkdir(parents=True, exist_ok=True)
+                    seq_args.corrected_mot = str(corr_root / f"{seq_name}.txt")
+                else:
+                    seq_args.corrected_mot = None
+                result = run_single_sequence(
+                    seq_name=seq_name,
+                    frames=frames,
+                    tracks=tracks,
+                    backend=backend,
+                    args=seq_args,
+                    output_path=seq_output,
+                    viz_dir=args.viz_dir,
+                )
+                aggregate["sequences"].append({
+                    "sequence": seq_name,
+                    "frames_dir": frames_dir,
+                    "mot_file": mot_file,
+                    "report_path": seq_output,
+                    "stage1_suspicious": result.get("stage1", {}).get("suspicious_count", 0),
+                    "stage2_count": len(result.get("stage2", {}).get("investigations", [])),
+                })
+        else:
+            gpu_list = _parse_gpu_devices(args.gpu_devices)
+            logger.info(f"并行模式启用：workers={args.num_workers}，gpu_list={gpu_list or '未指定'}")
+            tasks = []
+            args_dict = vars(args).copy()
+            for idx, (seq_name, frames_dir, mot_file) in enumerate(pairs):
+                seq_output = str(seq_out_dir / f"{seq_name}.json")
+                gpu_device = gpu_list[idx % len(gpu_list)] if gpu_list else ""
+                tasks.append({
+                    "seq_name": seq_name,
+                    "frames_dir": frames_dir,
+                    "mot_file": mot_file,
+                    "seq_output": seq_output,
+                    "args_dict": args_dict,
+                    "gpu_device": gpu_device,
+                    "viz_dir": args.viz_dir,
+                })
+
+            done = 0
+            with ProcessPoolExecutor(max_workers=args.num_workers) as ex:
+                futures = [ex.submit(_process_sequence_worker, t) for t in tasks]
+                for fut in as_completed(futures):
+                    done += 1
+                    res = fut.result()
+                    logger.info(f"[{done}/{len(tasks)}] 完成序列 {res['sequence']}")
+                    aggregate["sequences"].append(res)
+
+            aggregate["sequences"].sort(key=lambda x: x["sequence"])
 
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(aggregate, f, ensure_ascii=False, indent=2)
         logger.info(f"多序列汇总报告已保存至 {args.output}")
         return
+
+    # ── 模型加载（单序列） ──
+    logger.info(f"加载模型：{args.model}")
+    backend = QwenVLBackend(model_name=args.model, use_ollama=False, device="cuda")
 
     # 单序列模式
     if args.demo:
@@ -352,6 +500,7 @@ def main():
         backend=backend,
         args=args,
         output_path=args.output,
+        viz_dir=args.viz_dir,
     )
 
 
