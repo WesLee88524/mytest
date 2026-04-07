@@ -290,6 +290,15 @@ def _parse_gpu_devices(gpu_devices: str) -> List[str]:
     return out
 
 
+def _auto_detect_gpu_devices() -> List[str]:
+    try:
+        import torch
+        n = torch.cuda.device_count()
+        return [str(i) for i in range(n)] if n > 0 else []
+    except Exception:
+        return []
+
+
 def _process_sequence_worker(task: dict) -> dict:
     """
     多进程 worker：每个进程独立加载模型并处理一个序列。
@@ -313,6 +322,7 @@ def _process_sequence_worker(task: dict) -> dict:
         device = "cuda:0"
     else:
         device = "cuda"
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
     backend = QwenVLBackend(model_name=args_dict["model"], use_ollama=False, device=device)
     frames = load_frames(frames_dir)
@@ -380,6 +390,8 @@ def main():
                         help="逗号分隔 GPU 列表，如 0,1,2,3；为空则不限制可见 GPU")
     parser.add_argument("--viz-dir", type=str, default=None,
                         help="可视化输出目录（按 seq_name/stage1|2|3 导出 jpg）")
+    parser.add_argument("--only-seq", type=str, default=None,
+                        help="仅处理指定序列名（用于快速排查单序列）")
     args = parser.parse_args()
     batch_mode = bool(args.frames_root and args.mot_root)
     if batch_mode and args.stage1_json:
@@ -387,6 +399,10 @@ def main():
 
     if batch_mode:
         pairs = resolve_batch_pairs(args.frames_root, args.mot_root, args.seq_glob)
+        if args.only_seq:
+            pairs = [p for p in pairs if p[0] == args.only_seq]
+            if not pairs:
+                parser.error(f"--only-seq={args.only_seq} 未匹配到序列")
         if not pairs:
             parser.error("未发现可处理序列，请检查 --frames-root/--mot-root/--seq-glob")
 
@@ -439,7 +455,30 @@ def main():
                 })
         else:
             gpu_list = _parse_gpu_devices(args.gpu_devices)
-            logger.info(f"并行模式启用：workers={args.num_workers}，gpu_list={gpu_list or '未指定'}")
+            if not gpu_list:
+                gpu_list = _auto_detect_gpu_devices()
+                if gpu_list:
+                    logger.info(f"未显式指定 --gpu-devices，自动探测到 GPU: {gpu_list}")
+
+            if gpu_list:
+                actual_workers = min(args.num_workers, len(gpu_list))
+                if actual_workers < args.num_workers:
+                    logger.warning(
+                        "num_workers=%s 大于 GPU 数=%s，自动降为 %s 以避免多进程抢同卡导致 OOM",
+                        args.num_workers, len(gpu_list), actual_workers
+                    )
+            else:
+                # 未指定 GPU 且无法探测，保守退化到单进程，避免所有进程挤到 cuda:0
+                actual_workers = 1
+                logger.warning(
+                    "未指定 GPU 且无法探测可用 GPU，已退化到单进程以降低 OOM 风险；"
+                    "建议显式传 --gpu-devices"
+                )
+
+            logger.info(
+                "并行模式启用：workers=%s（requested=%s），gpu_list=%s",
+                actual_workers, args.num_workers, gpu_list or "未指定"
+            )
             tasks = []
             args_dict = vars(args).copy()
             for idx, (seq_name, frames_dir, mot_file) in enumerate(pairs):
@@ -456,13 +495,25 @@ def main():
                 })
 
             done = 0
-            with ProcessPoolExecutor(max_workers=args.num_workers) as ex:
+            with ProcessPoolExecutor(max_workers=actual_workers) as ex:
                 futures = [ex.submit(_process_sequence_worker, t) for t in tasks]
                 for fut in as_completed(futures):
                     done += 1
-                    res = fut.result()
-                    logger.info(f"[{done}/{len(tasks)}] 完成序列 {res['sequence']}")
-                    aggregate["sequences"].append(res)
+                    try:
+                        res = fut.result()
+                        logger.info(f"[{done}/{len(tasks)}] 完成序列 {res['sequence']}")
+                        aggregate["sequences"].append(res)
+                    except Exception as e:
+                        logger.exception(f"[{done}/{len(tasks)}] 子任务失败：{e}")
+                        aggregate["sequences"].append({
+                            "sequence": "unknown",
+                            "frames_dir": "",
+                            "mot_file": "",
+                            "report_path": "",
+                            "stage1_suspicious": 0,
+                            "stage2_count": 0,
+                            "error": str(e),
+                        })
 
             aggregate["sequences"].sort(key=lambda x: x["sequence"])
 
