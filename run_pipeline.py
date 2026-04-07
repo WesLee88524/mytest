@@ -397,6 +397,10 @@ def main():
 
     if batch_mode:
         pairs = resolve_batch_pairs(args.frames_root, args.mot_root, args.seq_glob)
+        if args.only_seq:
+            pairs = [p for p in pairs if p[0] == args.only_seq]
+            if not pairs:
+                parser.error(f"--only-seq={args.only_seq} 未匹配到序列")
         if not pairs:
             parser.error("未发现可处理序列，请检查 --frames-root/--mot-root/--seq-glob")
 
