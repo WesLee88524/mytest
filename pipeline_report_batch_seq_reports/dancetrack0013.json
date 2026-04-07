@@ -1,0 +1,234 @@
+{
+  "sequence": "dancetrack0013",
+  "stage1": {
+    "output_json": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0013_stage1.json",
+    "total_tracks": 12,
+    "suspicious_count": 9,
+    "ok_count": 3
+  },
+  "stage2": {
+    "investigations": [
+      {
+        "track_id": 715,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          561,
+          561
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移点处目标位置异常跳变",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "check_nearby_tracks",
+          "replay_segment",
+          "compare_appearances",
+          "replay_segment"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 716,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          118,
+          119
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移49.48帧内出现异常跳变",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "zoom_region",
+          "compare_appearances",
+          "check_nearby_tracks",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 717,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          181,
+          190
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：目标在181至190帧间位置异常跳变，不符合运动规律。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "zoom_region",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 718,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          255,
+          270
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移253.28帧内有异常跳变",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "zoom_region",
+          "check_nearby_tracks",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 719,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          270,
+          1203
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移较大，存在异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "replay_segment",
+          "zoom_region",
+          "compare_appearances",
+          "replay_segment"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 720,
+        "confirmed": true,
+        "anomaly_type": "miss",
+        "frame_range": [
+          316,
+          328
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：目标在第316帧至第328帧间中断，消失超过5帧。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 722,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          555,
+          1200
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移144.62帧内有显著跳变，不符合运动规律。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "zoom_region",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 725,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          751,
+          1203
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移较大，且存在跳跃帧",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "replay_segment",
+          "check_nearby_tracks",
+          "replay_segment",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 726,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          971,
+          1203
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移较大，存在异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      }
+    ]
+  },
+  "stage3": {
+    "before_track_count": 12,
+    "after_track_count": 12,
+    "applied_count": 1,
+    "rollback_count": 1,
+    "actions": [
+      {
+        "track_id": 715,
+        "anomaly_type": "drift",
+        "frame_range": [
+          561,
+          561
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 561-561，更新 1 帧；局部验证未通过，已回滚"
+      },
+      {
+        "track_id": 720,
+        "anomaly_type": "miss",
+        "frame_range": [
+          316,
+          328
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": true,
+        "rolled_back": false,
+        "details": "补全漏检帧 11 个（317-327）"
+      }
+    ],
+    "corrected_mot_path": "/public/home/lyh_npu/code/PostMOT/corrected_mot/dancetrack0013.txt",
+    "validation_enabled": true,
+    "min_confidence": 0.65
+  }
+}

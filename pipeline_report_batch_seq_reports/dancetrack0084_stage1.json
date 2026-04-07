@@ -1,0 +1,192 @@
+{
+  "total_tracks": 17,
+  "suspicious": [
+    {
+      "track_id": 69,
+      "anomaly_type": "drift",
+      "frame_range": [
+        59,
+        59
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移异常大，可能是位置跳跃。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 70,
+      "anomaly_type": "drift",
+      "frame_range": [
+        657,
+        657
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移点处目标位置异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 71,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移46.55帧内有显著跳变，不符合运动规律。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 72,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 73,
+      "anomaly_type": "drift",
+      "frame_range": [
+        62,
+        70
+      ],
+      "confidence": 0.8,
+      "reason": "目标在第62帧到第70帧间位置异常跳变，不符合运动规律。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 74,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移136.9帧内出现，表明存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 75,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1198
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 76,
+      "anomaly_type": "drift",
+      "frame_range": [
+        816,
+        816
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移帧816处目标位置异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 77,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1198
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 78,
+      "anomaly_type": "drift",
+      "frame_range": [
+        64,
+        814
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，且存在多个异常跳变帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 79,
+      "anomaly_type": "miss",
+      "frame_range": [
+        476,
+        488
+      ],
+      "confidence": 0.8,
+      "reason": "轨迹中断，目标在第476帧至第488帧间消失。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 80,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 81,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1138
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移达到93.21，表明存在显著位置跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 82,
+      "anomaly_type": "drift",
+      "frame_range": [
+        73,
+        73
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移帧为73，位置异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 83,
+      "anomaly_type": "drift",
+      "frame_range": [
+        880,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移43.64帧内有异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 84,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1196,
+        1197
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移为74.05，表明目标位置发生了异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 85,
+      "anomaly_type": "miss",
+      "frame_range": [
+        1142,
+        1198
+      ],
+      "confidence": 0.9,
+      "reason": "轨迹中断，目标消失超过5帧",
+      "related_track_id": null
+    }
+  ]
+}

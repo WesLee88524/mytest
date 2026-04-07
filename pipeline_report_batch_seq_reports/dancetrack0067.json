@@ -1,0 +1,149 @@
+{
+  "sequence": "dancetrack0067",
+  "stage1": {
+    "output_json": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0067_stage1.json",
+    "total_tracks": 6,
+    "suspicious_count": 4,
+    "ok_count": 2
+  },
+  "stage2": {
+    "investigations": [
+      {
+        "track_id": 286,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          535,
+          536
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移发生在第536帧，可能为异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "zoom_region",
+          "compare_appearances",
+          "check_nearby_tracks",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 288,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          667,
+          667
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移发生在第667帧，位置异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "check_nearby_tracks",
+          "replay_segment",
+          "compare_appearances",
+          "replay_segment"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 289,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          876,
+          876
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移发生在第876帧，可能为异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 290,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          781,
+          944
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移较大，存在异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "replay_segment",
+          "zoom_region",
+          "compare_appearances",
+          "replay_segment"
+        ],
+        "related_track_id": null
+      }
+    ]
+  },
+  "stage3": {
+    "before_track_count": 6,
+    "after_track_count": 6,
+    "applied_count": 1,
+    "rollback_count": 2,
+    "actions": [
+      {
+        "track_id": 286,
+        "anomaly_type": "drift",
+        "frame_range": [
+          535,
+          536
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 535-536，更新 2 帧；局部验证未通过，已回滚"
+      },
+      {
+        "track_id": 288,
+        "anomaly_type": "drift",
+        "frame_range": [
+          667,
+          667
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": true,
+        "rolled_back": false,
+        "details": "平滑修正漂移帧 667-667，更新 1 帧"
+      },
+      {
+        "track_id": 289,
+        "anomaly_type": "drift",
+        "frame_range": [
+          876,
+          876
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 876-876，更新 1 帧；局部验证未通过，已回滚"
+      }
+    ],
+    "corrected_mot_path": "/public/home/lyh_npu/code/PostMOT/corrected_mot/dancetrack0067.txt",
+    "validation_enabled": true,
+    "min_confidence": 0.65
+  }
+}

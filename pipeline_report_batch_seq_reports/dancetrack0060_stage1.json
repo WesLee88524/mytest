@@ -1,0 +1,93 @@
+{
+  "total_tracks": 9,
+  "suspicious": [
+    {
+      "track_id": 318,
+      "anomaly_type": "miss",
+      "frame_range": [
+        1003,
+        1012
+      ],
+      "confidence": 0.9,
+      "reason": "轨迹中断，目标消失超过5帧",
+      "related_track_id": null
+    },
+    {
+      "track_id": 319,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        628
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 320,
+      "anomaly_type": "miss",
+      "frame_range": [
+        28,
+        40
+      ],
+      "confidence": 0.9,
+      "reason": "目标在第28帧至第40帧间中断，消失超过5帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 321,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移88.29帧内有显著跳变，不符合运动规律。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 322,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1202
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移91.65帧，表明存在显著位置跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 323,
+      "anomaly_type": "miss",
+      "frame_range": [
+        109,
+        118
+      ],
+      "confidence": 0.9,
+      "reason": "目标在第109帧后消失，持续9帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 325,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1004,
+        1195
+      ],
+      "confidence": 0.8,
+      "reason": "目标位置在1004帧后出现异常跳变，最大位移达55.83。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 326,
+      "anomaly_type": "miss",
+      "frame_range": [
+        1160,
+        1167
+      ],
+      "confidence": 0.9,
+      "reason": "目标在第1160帧至第1167帧间中断，消失超过5帧。",
+      "related_track_id": null
+    }
+  ]
+}

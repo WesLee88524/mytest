@@ -1,0 +1,126 @@
+{
+  "total_tracks": 13,
+  "suspicious": [
+    {
+      "track_id": 305,
+      "anomaly_type": "drift",
+      "frame_range": [
+        679,
+        707
+      ],
+      "confidence": 0.8,
+      "reason": "目标在第679帧至第707帧间位置异常跳变，不符合运动规律。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 306,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1283
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 307,
+      "anomaly_type": "miss",
+      "frame_range": [
+        1252,
+        1272
+      ],
+      "confidence": 0.9,
+      "reason": "轨迹在1252帧后中断，持续8帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 308,
+      "anomaly_type": "drift",
+      "frame_range": [
+        353,
+        353
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移帧353处目标位置异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 310,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1283
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 311,
+      "anomaly_type": "miss",
+      "frame_range": [
+        1248,
+        1272
+      ],
+      "confidence": 0.9,
+      "reason": "轨迹在1248帧后中断，持续至1272帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 312,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1283
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 313,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        1283
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 314,
+      "anomaly_type": "miss",
+      "frame_range": [
+        353,
+        362
+      ],
+      "confidence": 0.8,
+      "reason": "目标在第353帧至第362帧间中断，未检测到目标。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 315,
+      "anomaly_type": "miss",
+      "frame_range": [
+        554,
+        573
+      ],
+      "confidence": 0.8,
+      "reason": "目标在第554帧后中断了19帧",
+      "related_track_id": null
+    },
+    {
+      "track_id": 316,
+      "anomaly_type": "miss",
+      "frame_range": [
+        585,
+        595
+      ],
+      "confidence": 0.9,
+      "reason": "目标在585帧后消失，持续10帧。",
+      "related_track_id": null
+    }
+  ]
+}

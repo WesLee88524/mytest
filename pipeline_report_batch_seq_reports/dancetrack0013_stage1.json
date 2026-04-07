@@ -1,0 +1,104 @@
+{
+  "total_tracks": 12,
+  "suspicious": [
+    {
+      "track_id": 715,
+      "anomaly_type": "drift",
+      "frame_range": [
+        561,
+        561
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移点处目标位置异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 716,
+      "anomaly_type": "drift",
+      "frame_range": [
+        118,
+        119
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移49.48帧内出现异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 717,
+      "anomaly_type": "drift",
+      "frame_range": [
+        181,
+        190
+      ],
+      "confidence": 0.8,
+      "reason": "目标在181至190帧间位置异常跳变，不符合运动规律。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 718,
+      "anomaly_type": "drift",
+      "frame_range": [
+        255,
+        270
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移253.28帧内有异常跳变",
+      "related_track_id": null
+    },
+    {
+      "track_id": 719,
+      "anomaly_type": "drift",
+      "frame_range": [
+        270,
+        1203
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 720,
+      "anomaly_type": "miss",
+      "frame_range": [
+        316,
+        328
+      ],
+      "confidence": 0.9,
+      "reason": "目标在第316帧至第328帧间中断，消失超过5帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 722,
+      "anomaly_type": "drift",
+      "frame_range": [
+        555,
+        1200
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移144.62帧内有显著跳变，不符合运动规律。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 725,
+      "anomaly_type": "drift",
+      "frame_range": [
+        751,
+        1203
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，且存在跳跃帧",
+      "related_track_id": null
+    },
+    {
+      "track_id": 726,
+      "anomaly_type": "drift",
+      "frame_range": [
+        971,
+        1203
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    }
+  ]
+}

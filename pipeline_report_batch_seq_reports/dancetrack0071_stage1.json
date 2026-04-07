@@ -1,0 +1,60 @@
+{
+  "total_tracks": 6,
+  "suspicious": [
+    {
+      "track_id": 620,
+      "anomaly_type": "miss",
+      "frame_range": [
+        561,
+        569
+      ],
+      "confidence": 0.9,
+      "reason": "轨迹在第561帧后中断，持续至第569帧。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 621,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        603
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 622,
+      "anomaly_type": "drift",
+      "frame_range": [
+        223,
+        224
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，且在特定帧出现异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 623,
+      "anomaly_type": "drift",
+      "frame_range": [
+        1,
+        603
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移266.89，表明存在显著位置跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 624,
+      "anomaly_type": "miss",
+      "frame_range": [
+        561,
+        593
+      ],
+      "confidence": 0.8,
+      "reason": "目标在561帧后至593帧间中断，消失超过5帧。",
+      "related_track_id": null
+    }
+  ]
+}

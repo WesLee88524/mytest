@@ -1,0 +1,49 @@
+{
+  "total_tracks": 6,
+  "suspicious": [
+    {
+      "track_id": 286,
+      "anomaly_type": "drift",
+      "frame_range": [
+        535,
+        536
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移发生在第536帧，可能为异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 288,
+      "anomaly_type": "drift",
+      "frame_range": [
+        667,
+        667
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移发生在第667帧，位置异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 289,
+      "anomaly_type": "drift",
+      "frame_range": [
+        876,
+        876
+      ],
+      "confidence": 0.9,
+      "reason": "最大位移发生在第876帧，可能为异常跳变。",
+      "related_track_id": null
+    },
+    {
+      "track_id": 290,
+      "anomaly_type": "drift",
+      "frame_range": [
+        781,
+        944
+      ],
+      "confidence": 0.8,
+      "reason": "最大位移较大，存在异常跳变。",
+      "related_track_id": null
+    }
+  ]
+}

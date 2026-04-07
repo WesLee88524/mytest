@@ -1,0 +1,324 @@
+{
+  "sequence": "dancetrack0100",
+  "stage1": {
+    "output_json": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0100_stage1.json",
+    "total_tracks": 12,
+    "suspicious_count": 10,
+    "ok_count": 2
+  },
+  "stage2": {
+    "investigations": [
+      {
+        "track_id": 243,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          86,
+          98
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：目标在第86帧到第98帧间位置异常跳变，不符合运动规律。",
+        "tool_calls": [
+          "replay_segment"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 245,
+        "confirmed": true,
+        "anomaly_type": "miss",
+        "frame_range": [
+          371,
+          383
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：目标在第371帧至第383帧间中断，消失超过5帧。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "compare_appearances",
+          "compare_appearances",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 246,
+        "confirmed": true,
+        "anomaly_type": "miss",
+        "frame_range": [
+          375,
+          384
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：目标在第375帧至第384帧间中断，消失超过5帧。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 247,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          246,
+          246
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移帧为246，位置异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 248,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          629,
+          629
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移帧为629，位置异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "zoom_region",
+          "check_nearby_tracks",
+          "replay_segment",
+          "compare_appearances",
+          "replay_segment"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 249,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          206,
+          247
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移较大且在特定帧出现异常跳变",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 250,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          367,
+          903
+        ],
+        "confidence": 0.6400000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移较大，且存在多次跳跃帧",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "zoom_region",
+          "replay_segment",
+          "check_nearby_tracks"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 251,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          491,
+          491
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移帧491处目标位置异常跳变",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 252,
+        "confirmed": true,
+        "anomaly_type": "miss",
+        "frame_range": [
+          788,
+          795
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：目标在第788帧到第795帧间中断，消失超过5帧。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      },
+      {
+        "track_id": 253,
+        "confirmed": true,
+        "anomaly_type": "drift",
+        "frame_range": [
+          858,
+          867
+        ],
+        "confidence": 0.7200000000000001,
+        "conclusion": "调查步数耗尽，沿用阶段一结论：最大位移为77.62，在第858帧出现异常跳变。",
+        "tool_calls": [
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances",
+          "replay_segment",
+          "check_nearby_tracks",
+          "compare_appearances"
+        ],
+        "related_track_id": null
+      }
+    ]
+  },
+  "stage3": {
+    "before_track_count": 12,
+    "after_track_count": 12,
+    "applied_count": 3,
+    "rollback_count": 4,
+    "actions": [
+      {
+        "track_id": 245,
+        "anomaly_type": "miss",
+        "frame_range": [
+          371,
+          383
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": true,
+        "rolled_back": false,
+        "details": "补全漏检帧 11 个（372-382）"
+      },
+      {
+        "track_id": 246,
+        "anomaly_type": "miss",
+        "frame_range": [
+          375,
+          384
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": true,
+        "rolled_back": false,
+        "details": "补全漏检帧 8 个（376-383）"
+      },
+      {
+        "track_id": 247,
+        "anomaly_type": "drift",
+        "frame_range": [
+          246,
+          246
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 246-246，更新 1 帧；局部验证未通过，已回滚"
+      },
+      {
+        "track_id": 248,
+        "anomaly_type": "drift",
+        "frame_range": [
+          629,
+          629
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 629-629，更新 1 帧；局部验证未通过，已回滚"
+      },
+      {
+        "track_id": 251,
+        "anomaly_type": "drift",
+        "frame_range": [
+          491,
+          491
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 491-491，更新 1 帧；局部验证未通过，已回滚"
+      },
+      {
+        "track_id": 252,
+        "anomaly_type": "miss",
+        "frame_range": [
+          788,
+          795
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": true,
+        "rolled_back": false,
+        "details": "补全漏检帧 6 个（789-794）"
+      },
+      {
+        "track_id": 253,
+        "anomaly_type": "drift",
+        "frame_range": [
+          858,
+          867
+        ],
+        "confidence": 0.7200000000000001,
+        "related_track_id": null,
+        "attempted": true,
+        "applied": true,
+        "verified": false,
+        "rolled_back": true,
+        "details": "平滑修正漂移帧 858-867，更新 10 帧；局部验证未通过，已回滚"
+      }
+    ],
+    "corrected_mot_path": "/public/home/lyh_npu/code/PostMOT/corrected_mot/dancetrack0100.txt",
+    "validation_enabled": true,
+    "min_confidence": 0.65
+  }
+}

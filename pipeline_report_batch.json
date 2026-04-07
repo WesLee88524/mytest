@@ -1,0 +1,288 @@
+{
+  "batch_mode": true,
+  "frames_root": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test",
+  "mot_root": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5",
+  "sequence_count": 35,
+  "sequences": [
+    {
+      "sequence": "dancetrack0003",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0003/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0003.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0003.json",
+      "stage1_suspicious": 22,
+      "stage2_count": 22
+    },
+    {
+      "sequence": "dancetrack0009",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0009/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0009.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0009.json",
+      "stage1_suspicious": 22,
+      "stage2_count": 22
+    },
+    {
+      "sequence": "dancetrack0011",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0011/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0011.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0011.json",
+      "stage1_suspicious": 15,
+      "stage2_count": 15
+    },
+    {
+      "sequence": "dancetrack0013",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0013/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0013.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0013.json",
+      "stage1_suspicious": 9,
+      "stage2_count": 9
+    },
+    {
+      "sequence": "dancetrack0017",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0017/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0017.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0017.json",
+      "stage1_suspicious": 10,
+      "stage2_count": 10
+    },
+    {
+      "sequence": "dancetrack0021",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0021/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0021.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0021.json",
+      "stage1_suspicious": 12,
+      "stage2_count": 12
+    },
+    {
+      "sequence": "dancetrack0022",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0022/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0022.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0022.json",
+      "stage1_suspicious": 28,
+      "stage2_count": 28
+    },
+    {
+      "sequence": "dancetrack0028",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0028/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0028.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0028.json",
+      "stage1_suspicious": 20,
+      "stage2_count": 20
+    },
+    {
+      "sequence": "dancetrack0031",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0031/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0031.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0031.json",
+      "stage1_suspicious": 19,
+      "stage2_count": 19
+    },
+    {
+      "sequence": "dancetrack0036",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0036/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0036.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0036.json",
+      "stage1_suspicious": 15,
+      "stage2_count": 15
+    },
+    {
+      "sequence": "dancetrack0038",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0038/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0038.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0038.json",
+      "stage1_suspicious": 8,
+      "stage2_count": 8
+    },
+    {
+      "sequence": "dancetrack0040",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0040/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0040.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0040.json",
+      "stage1_suspicious": 11,
+      "stage2_count": 11
+    },
+    {
+      "sequence": "dancetrack0042",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0042/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0042.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0042.json",
+      "stage1_suspicious": 25,
+      "stage2_count": 25
+    },
+    {
+      "sequence": "dancetrack0046",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0046/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0046.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0046.json",
+      "stage1_suspicious": 52,
+      "stage2_count": 52
+    },
+    {
+      "sequence": "dancetrack0048",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0048/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0048.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0048.json",
+      "stage1_suspicious": 13,
+      "stage2_count": 13
+    },
+    {
+      "sequence": "dancetrack0050",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0050/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0050.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0050.json",
+      "stage1_suspicious": 17,
+      "stage2_count": 17
+    },
+    {
+      "sequence": "dancetrack0054",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0054/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0054.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0054.json",
+      "stage1_suspicious": 5,
+      "stage2_count": 5
+    },
+    {
+      "sequence": "dancetrack0056",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0056/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0056.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0056.json",
+      "stage1_suspicious": 8,
+      "stage2_count": 8
+    },
+    {
+      "sequence": "dancetrack0059",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0059/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0059.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0059.json",
+      "stage1_suspicious": 9,
+      "stage2_count": 9
+    },
+    {
+      "sequence": "dancetrack0060",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0060/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0060.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0060.json",
+      "stage1_suspicious": 8,
+      "stage2_count": 8
+    },
+    {
+      "sequence": "dancetrack0064",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0064/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0064.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0064.json",
+      "stage1_suspicious": 6,
+      "stage2_count": 6
+    },
+    {
+      "sequence": "dancetrack0067",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0067/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0067.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0067.json",
+      "stage1_suspicious": 4,
+      "stage2_count": 4
+    },
+    {
+      "sequence": "dancetrack0070",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0070/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0070.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0070.json",
+      "stage1_suspicious": 14,
+      "stage2_count": 14
+    },
+    {
+      "sequence": "dancetrack0071",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0071/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0071.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0071.json",
+      "stage1_suspicious": 5,
+      "stage2_count": 5
+    },
+    {
+      "sequence": "dancetrack0076",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0076/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0076.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0076.json",
+      "stage1_suspicious": 30,
+      "stage2_count": 30
+    },
+    {
+      "sequence": "dancetrack0078",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0078/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0078.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0078.json",
+      "stage1_suspicious": 8,
+      "stage2_count": 8
+    },
+    {
+      "sequence": "dancetrack0084",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0084/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0084.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0084.json",
+      "stage1_suspicious": 17,
+      "stage2_count": 17
+    },
+    {
+      "sequence": "dancetrack0085",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0085/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0085.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0085.json",
+      "stage1_suspicious": 46,
+      "stage2_count": 46
+    },
+    {
+      "sequence": "dancetrack0088",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0088/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0088.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0088.json",
+      "stage1_suspicious": 23,
+      "stage2_count": 23
+    },
+    {
+      "sequence": "dancetrack0089",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0089/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0089.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0089.json",
+      "stage1_suspicious": 25,
+      "stage2_count": 25
+    },
+    {
+      "sequence": "dancetrack0091",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0091/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0091.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0091.json",
+      "stage1_suspicious": 12,
+      "stage2_count": 12
+    },
+    {
+      "sequence": "dancetrack0092",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0092/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0092.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0092.json",
+      "stage1_suspicious": 22,
+      "stage2_count": 22
+    },
+    {
+      "sequence": "dancetrack0093",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0093/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0093.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0093.json",
+      "stage1_suspicious": 34,
+      "stage2_count": 34
+    },
+    {
+      "sequence": "dancetrack0095",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0095/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0095.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0095.json",
+      "stage1_suspicious": 31,
+      "stage2_count": 31
+    },
+    {
+      "sequence": "dancetrack0100",
+      "frames_dir": "/public/home/lyh_npu/code/RT-MOTRv2/data/DanceTrack/test/dancetrack0100/img1",
+      "mot_file": "/public/home/lyh_npu/code/RT-MOTRv2/exps/test/tracker-66.5/dancetrack0100.txt",
+      "report_path": "/public/home/lyh_npu/code/PostMOT/pipeline_report_batch_seq_reports/dancetrack0100.json",
+      "stage1_suspicious": 10,
+      "stage2_count": 10
+    }
+  ]
+}
