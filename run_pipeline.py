@@ -390,8 +390,6 @@ def main():
                         help="逗号分隔 GPU 列表，如 0,1,2,3；为空则不限制可见 GPU")
     parser.add_argument("--viz-dir", type=str, default=None,
                         help="可视化输出目录（按 seq_name/stage1|2|3 导出 jpg）")
-    parser.add_argument("--only-seq", type=str, default=None,
-                        help="仅处理指定序列名（用于快速排查单序列）")
     args = parser.parse_args()
     batch_mode = bool(args.frames_root and args.mot_root)
     if batch_mode and args.stage1_json:
