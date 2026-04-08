@@ -132,7 +132,7 @@ class TrackCorrector:
         frames: Dict[int, np.ndarray],
         backend: Optional[QwenVLBackend] = None,
         enable_validation: bool = True,
-        validation_gain: float = 0.30,
+        validation_gain: float = 0.15,
     ):
         self.frames = frames
         self.backend = backend
@@ -228,7 +228,16 @@ class TrackCorrector:
         if main is None:
             return False, "主轨迹不存在"
         if other is None:
-            return False, "缺少 related_track_id 或 related 轨迹不存在"
+            # 兜底策略：阶段二未给出 related_track_id 时，尝试剔除可疑帧段，
+            # 避免“确认了 ID 切换但完全不修”的情况。
+            start, end = inv.frame_range
+            before = len(main.boxes)
+            kept = [b for b in main.boxes if not (start <= b.frame_id <= end)]
+            removed = before - len(kept)
+            if removed <= 0:
+                return False, "缺少 related_track_id，且可疑区间无可剔除帧"
+            main.boxes = kept
+            return True, f"缺少 related_track_id，已剔除主轨迹可疑帧段 {start}-{end}（{removed} 帧）"
 
         start, _ = inv.frame_range
         move_boxes = [copy.deepcopy(b) for b in other.boxes if b.frame_id >= start]
@@ -271,13 +280,18 @@ class TrackCorrector:
         a = prev_boxes[-1]
         b = next_boxes[0]
         updated = 0
+        added = 0
         by_fid = {bx.frame_id: bx for bx in track.boxes}
         for fid in range(start, end + 1):
-            if fid in by_fid:
-                by_fid[fid] = _interpolate_box(a, b, fid)
+            existed = fid in by_fid
+            by_fid[fid] = _interpolate_box(a, b, fid)
+            if existed:
                 updated += 1
+            else:
+                added += 1
         track.boxes = _dedup_sort_boxes(list(by_fid.values()))
-        return (updated > 0), f"平滑修正漂移帧 {start}-{end}，更新 {updated} 帧"
+        changed = updated + added
+        return (changed > 0), f"平滑修正漂移帧 {start}-{end}，更新 {updated} 帧，新增 {added} 帧"
 
     def _fix_miss(self, tracks: Dict[int, Track], inv: Investigation) -> Tuple[bool, str]:
         track = tracks.get(inv.track_id)
@@ -319,8 +333,15 @@ class TrackCorrector:
         suspicion = self._validator.inspect_one(track, self.frames)
         if suspicion.anomaly_type != inv.anomaly_type:
             return True
-        # 同类型但置信度明显下降也视为通过
-        return suspicion.confidence <= max(0.05, inv.confidence * (1.0 - self.validation_gain))
+        # 同类型但发生在不同帧段，说明当前修正目标区域已缓解，也可放行
+        if not self._ranges_overlap(suspicion.frame_range, inv.frame_range):
+            return True
+        # 同类型且同区域：置信度有下降即可通过（默认下降 15%）
+        return suspicion.confidence <= max(0.10, inv.confidence * (1.0 - self.validation_gain))
+
+    @staticmethod
+    def _ranges_overlap(a: Tuple[int, int], b: Tuple[int, int]) -> bool:
+        return max(a[0], b[0]) <= min(a[1], b[1])
 
 
 def dump_mot_result(tracks: Dict[int, Track], output_path: str) -> None:
@@ -355,4 +376,3 @@ def dump_mot_result(tracks: Dict[int, Track], output_path: str) -> None:
 #   --enable-stage3 \
 #   --stage3-min-confidence 0.65 \
 #   --corrected-mot /public/home/lyh_npu/code/PostMOT/corrected_mot > test.log 2>&1 &
-
