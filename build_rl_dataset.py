@@ -271,17 +271,130 @@ def write_jsonl(events: List[dict], out_path: str) -> None:
             f.write(json.dumps(ev, ensure_ascii=False) + "\n")
 
 
+def _find_gt_file(seq_dir: Path) -> Optional[Path]:
+    cands = [
+        seq_dir / "gt" / "gt.txt",
+        seq_dir / "gt.txt",
+    ]
+    for p in cands:
+        if p.exists():
+            return p
+    return None
+
+
+def _find_tracker_file(tracker_root: Path, seq_name: str) -> Optional[Path]:
+    cands = [
+        tracker_root / f"{seq_name}.txt",
+        tracker_root / seq_name / "tracks.txt",
+        tracker_root / seq_name / "result.txt",
+    ]
+    for p in cands:
+        if p.exists():
+            return p
+    return None
+
+
+def run_batch(
+    gt_root: str,
+    tracker_root: str,
+    output_dir: str,
+    seq_glob: str,
+    iou_match_thr: float,
+    drift_iou_thr: float,
+    miss_gap_min: int,
+    fp_min_len: int,
+) -> dict:
+    gt_root_p = Path(gt_root)
+    trk_root_p = Path(tracker_root)
+    out_root = Path(output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    seq_dirs = [p for p in sorted(gt_root_p.glob(seq_glob)) if p.is_dir()]
+    summary = {
+        "mode": "batch",
+        "gt_root": str(gt_root_p),
+        "tracker_root": str(trk_root_p),
+        "sequence_count": 0,
+        "sequences": [],
+    }
+
+    for seq_dir in seq_dirs:
+        seq_name = seq_dir.name
+        gt_file = _find_gt_file(seq_dir)
+        trk_file = _find_tracker_file(trk_root_p, seq_name)
+        if gt_file is None or trk_file is None:
+            summary["sequences"].append({
+                "seq_name": seq_name,
+                "status": "skipped",
+                "reason": f"missing gt/tracker file: gt={gt_file}, tracker={trk_file}",
+            })
+            continue
+
+        gt_by_frame = read_mot(str(gt_file))
+        trk_by_frame = read_mot(str(trk_file))
+        events = build_events_for_sequence(
+            seq_name=seq_name,
+            gt_by_frame=gt_by_frame,
+            trk_by_frame=trk_by_frame,
+            iou_match_thr=iou_match_thr,
+            drift_iou_thr=drift_iou_thr,
+            miss_gap_min=miss_gap_min,
+            fp_min_len=fp_min_len,
+        )
+        out_jsonl = out_root / f"{seq_name}.jsonl"
+        write_jsonl(events, str(out_jsonl))
+        summary["sequence_count"] += 1
+        summary["sequences"].append({
+            "seq_name": seq_name,
+            "status": "ok",
+            "gt_file": str(gt_file),
+            "tracker_file": str(trk_file),
+            "output_jsonl": str(out_jsonl),
+            "event_count": len(events),
+        })
+        print(f"[{seq_name}] 写出 {len(events)} 条事件到 {out_jsonl}")
+
+    summary_path = out_root / "summary.json"
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+    print(f"[batch] 汇总写出: {summary_path}")
+    return summary
+
+
 def main():
     parser = argparse.ArgumentParser(description="构建阶段一 RL/SFT 训练样本（第一版）")
-    parser.add_argument("--seq-name", type=str, required=True)
-    parser.add_argument("--gt", type=str, required=True, help="GT MOT txt")
-    parser.add_argument("--tracker", type=str, required=True, help="tracker MOT txt (ByteTrack/OCSORT)")
-    parser.add_argument("--output", type=str, required=True, help="输出 JSONL")
+    # 单序列模式
+    parser.add_argument("--seq-name", type=str, default=None)
+    parser.add_argument("--gt", type=str, default=None, help="GT MOT txt")
+    parser.add_argument("--tracker", type=str, default=None, help="tracker MOT txt (ByteTrack/OCSORT)")
+    parser.add_argument("--output", type=str, default=None, help="输出 JSONL")
+    # 批量模式
+    parser.add_argument("--gt-root", type=str, default=None, help="多序列 GT 根目录（如 DanceTrack/val）")
+    parser.add_argument("--tracker-root", type=str, default=None, help="多序列 tracker 结果根目录")
+    parser.add_argument("--output-dir", type=str, default=None, help="批量模式输出目录（每序列一个 jsonl）")
+    parser.add_argument("--seq-glob", type=str, default="dancetrack*", help="序列匹配模式")
     parser.add_argument("--iou-match-thr", type=float, default=0.5)
     parser.add_argument("--drift-iou-thr", type=float, default=0.3)
     parser.add_argument("--miss-gap-min", type=int, default=2)
     parser.add_argument("--fp-min-len", type=int, default=2)
     args = parser.parse_args()
+
+    batch_mode = bool(args.gt_root and args.tracker_root and args.output_dir)
+    if batch_mode:
+        run_batch(
+            gt_root=args.gt_root,
+            tracker_root=args.tracker_root,
+            output_dir=args.output_dir,
+            seq_glob=args.seq_glob,
+            iou_match_thr=args.iou_match_thr,
+            drift_iou_thr=args.drift_iou_thr,
+            miss_gap_min=args.miss_gap_min,
+            fp_min_len=args.fp_min_len,
+        )
+        return
+
+    if not (args.seq_name and args.gt and args.tracker and args.output):
+        parser.error("单序列模式需要 --seq-name --gt --tracker --output；或使用批量参数 --gt-root --tracker-root --output-dir")
 
     gt_by_frame = read_mot(args.gt)
     trk_by_frame = read_mot(args.tracker)
