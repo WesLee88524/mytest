@@ -2,7 +2,7 @@
 第一版：从 tracker 结果 + GT 构建阶段一训练样本（JSONL）
 
 目标：
-  1) 自动发现 id_switch / miss / drift / fragment 事件；
+  1) 自动发现 id_switch / miss / drift / fragment / false_positive 事件；
   2) 生成可用于 SFT / RL 的结构化样本；
   3) 与当前阶段一输出结构对齐（anomaly_type + frame_range + confidence）。
 
@@ -119,10 +119,11 @@ def build_events_for_sequence(
     iou_match_thr: float = 0.5,
     drift_iou_thr: float = 0.3,
     miss_gap_min: int = 2,
+    fp_min_len: int = 2,
 ) -> List[dict]:
     """
     产出事件级样本（可用于阶段一训练）：
-      - id_switch / miss / drift / fragment / ok
+      - id_switch / miss / drift / fragment / false_positive / ok
     """
     all_frames = sorted(set(gt_by_frame.keys()) | set(trk_by_frame.keys()))
     if not all_frames:
@@ -132,16 +133,25 @@ def build_events_for_sequence(
     gt_timeline: Dict[int, List[Tuple[int, Optional[int], float]]] = {}
     # tracker_id -> list[frame_id]
     tracker_frames: Dict[int, List[int]] = {}
+    # tracker_id -> list[frame_id]（该帧该目标没有匹配到任何 GT）
+    tracker_unmatched_frames: Dict[int, List[int]] = {}
 
     for fid in all_frames:
         gt_boxes = gt_by_frame.get(fid, [])
         trk_boxes = trk_by_frame.get(fid, [])
+        for t in trk_boxes:
+            tracker_frames.setdefault(t.track_id, []).append(fid)
         matches = greedy_match(gt_boxes, trk_boxes, iou_thr=iou_match_thr)
 
         g_to_t: Dict[int, Tuple[Optional[int], float]] = {i: (None, 0.0) for i in range(len(gt_boxes))}
+        matched_ti = set()
         for gi, ti, ov in matches:
             g_to_t[gi] = (trk_boxes[ti].track_id, ov)
-            tracker_frames.setdefault(trk_boxes[ti].track_id, []).append(fid)
+            matched_ti.add(ti)
+
+        for ti, t in enumerate(trk_boxes):
+            if ti not in matched_ti:
+                tracker_unmatched_frames.setdefault(t.track_id, []).append(fid)
 
         for gi, g in enumerate(gt_boxes):
             tid, ov = g_to_t[gi]
@@ -209,7 +219,22 @@ def build_events_for_sequence(
                     "meta": {"segments": segs},
                 })
 
-    # 5) ok 样本：tracker 轨迹中未命中任何异常帧段的轨迹
+    # 5) false_positive：tracker 连续出现，但无法匹配到任何 GT
+    for tid, fids in tracker_unmatched_frames.items():
+        for s, e in group_consecutive(fids):
+            if e - s + 1 < fp_min_len:
+                continue
+            events.append({
+                "seq_name": seq_name,
+                "gt_id": None,
+                "track_id": tid,
+                "anomaly_type": "false_positive",
+                "frame_range": [s, e],
+                "confidence": 0.88,
+                "meta": {"length": e - s + 1},
+            })
+
+    # 6) ok 样本：tracker 轨迹中未命中任何异常帧段的轨迹
     bad_by_tid: Dict[int, List[Tuple[int, int]]] = {}
     for ev in events:
         tid = ev.get("track_id")
@@ -255,6 +280,7 @@ def main():
     parser.add_argument("--iou-match-thr", type=float, default=0.5)
     parser.add_argument("--drift-iou-thr", type=float, default=0.3)
     parser.add_argument("--miss-gap-min", type=int, default=2)
+    parser.add_argument("--fp-min-len", type=int, default=2)
     args = parser.parse_args()
 
     gt_by_frame = read_mot(args.gt)
@@ -266,6 +292,7 @@ def main():
         iou_match_thr=args.iou_match_thr,
         drift_iou_thr=args.drift_iou_thr,
         miss_gap_min=args.miss_gap_min,
+        fp_min_len=args.fp_min_len,
     )
     write_jsonl(events, args.output)
     print(f"[{args.seq_name}] 写出 {len(events)} 条事件到 {args.output}")
