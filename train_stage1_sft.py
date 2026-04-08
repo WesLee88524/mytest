@@ -14,6 +14,11 @@
 
 本脚本采用 instruction tuning 方式，将结构化事件转成
 “指令 + 上下文 -> JSON 输出”的监督样本进行 SFT。
+
+注意：
+  - v1 默认是 text-only SFT baseline；
+  - 若要做真正 VLM SFT，请在事件中提供图像字段（如 contact_sheet_path），
+    并用 --require-image 强制筛选，仅训练带图样本。
 """
 from __future__ import annotations
 
@@ -71,7 +76,7 @@ def load_events(input_path: str) -> List[dict]:
     raise FileNotFoundError(f"input not found: {input_path}")
 
 
-def event_to_example(ev: dict) -> Dict[str, str]:
+def event_to_example(ev: dict, image_field: str) -> Dict[str, str]:
     anomaly_type = ev.get("anomaly_type", "ok")
     frame_range = ev.get("frame_range", [0, 0])
     conf = float(ev.get("confidence", 0.5))
@@ -79,6 +84,7 @@ def event_to_example(ev: dict) -> Dict[str, str]:
     seq_name = ev.get("seq_name", "")
     gt_id = ev.get("gt_id", None)
     meta = ev.get("meta", {})
+    image_path = ev.get(image_field, None)
 
     user = {
         "seq_name": seq_name,
@@ -86,6 +92,7 @@ def event_to_example(ev: dict) -> Dict[str, str]:
         "gt_id": gt_id,
         "frame_range": frame_range,
         "meta": meta,
+        "image_path": image_path,
     }
     # 第一版：related_track_id 无法从自动标注稳定恢复，先置 null
     assistant = {
@@ -183,6 +190,10 @@ def main():
     parser.add_argument("--lora-r", type=int, default=16)
     parser.add_argument("--lora-alpha", type=int, default=32)
     parser.add_argument("--lora-dropout", type=float, default=0.05)
+    parser.add_argument("--image-field", type=str, default="contact_sheet_path",
+                        help="事件中图像路径字段名（用于 VLM 样本）")
+    parser.add_argument("--require-image", action="store_true",
+                        help="只保留包含 image-field 的样本")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -192,7 +203,15 @@ def main():
     if not events:
         raise RuntimeError("输入事件为空，无法训练")
 
-    examples = [event_to_example(ev) for ev in events]
+    if args.require_image:
+        events = [ev for ev in events if ev.get(args.image_field)]
+        if not events:
+            raise RuntimeError(f"启用 --require-image 后无样本，请检查字段 {args.image_field}")
+        print(f"after image filter ({args.image_field}): {len(events)}")
+    else:
+        print("warning: 当前为 text-only SFT baseline；建议后续切换到带图样本训练。")
+
+    examples = [event_to_example(ev, image_field=args.image_field) for ev in events]
     train_items, val_items = train_val_split(examples, val_ratio=args.val_ratio, seed=args.seed)
     print(f"events={len(events)} train={len(train_items)} val={len(val_items)}")
 
