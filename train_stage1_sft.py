@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import torch
-from datasets import Dataset
+from torch.utils.data import Dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -134,19 +134,28 @@ def build_hf_dataset(
     tokenizer,
     max_length: int,
 ) -> EncodedDataset:
-    def _encode_one(ex):
-        full_text = ex["prompt"] + ex["answer"] + tokenizer.eos_token
-        tok = tokenizer(
-            full_text,
-            truncation=True,
-            max_length=max_length,
-            padding=False,
-        )
-        tok["labels"] = tok["input_ids"][:]
-        return tok
+    class TokenizedDataset(Dataset):
+        def __init__(self, items: List[dict]):
+            self.samples = []
+            for ex in items:
+                full_text = ex["prompt"] + ex["answer"] + tokenizer.eos_token
+                tok = tokenizer(
+                    full_text,
+                    truncation=True,
+                    max_length=max_length,
+                    padding=False,
+                )
+                tok["labels"] = tok["input_ids"][:]
+                self.samples.append(tok)
 
-    train_ds = Dataset.from_list(train_items).map(_encode_one, remove_columns=["prompt", "answer"])
-    val_ds = Dataset.from_list(val_items).map(_encode_one, remove_columns=["prompt", "answer"])
+        def __len__(self):
+            return len(self.samples)
+
+        def __getitem__(self, idx):
+            return self.samples[idx]
+
+    train_ds = TokenizedDataset(train_items)
+    val_ds = TokenizedDataset(val_items)
     return EncodedDataset(train=train_ds, val=val_ds)
 
 
