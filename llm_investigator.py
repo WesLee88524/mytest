@@ -165,7 +165,7 @@ class LLMInvestigator:
 
         hf_messages = [{"role": "system", "content": INVESTIGATOR_SYSTEM}]
         all_pil_images = []
-        max_images = 12
+        max_images = getattr(self.backend, "max_investigator_images", 12)
 
         for msg in messages:
             role = msg["role"]
