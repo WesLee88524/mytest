@@ -120,10 +120,18 @@ class QwenVLBackend:
         logger.info(f"加载本地模型：{model_name}（device={device}）")
         self._device = device
 
-        self._processor = AutoProcessor.from_pretrained(
-            model_name,
-            use_fast=True,
-        )
+        # 不同 transformers 版本对 Qwen2-VL video processor 的 kwargs 支持不一致：
+        # 某些版本传 backend 会触发：
+        #   AttributeError: property 'backend' of 'Qwen2VLVideoProcessor' object has no setter
+        # 因此采用“尝试新参数 -> 失败回退默认”策略，保证兼容性优先。
+        try:
+            self._processor = AutoProcessor.from_pretrained(
+                model_name,
+                backend="torchvision",
+            )
+        except Exception as e:
+            logger.warning(f"AutoProcessor 使用 backend 参数失败，回退默认加载：{e}")
+            self._processor = AutoProcessor.from_pretrained(model_name)
 
         self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             model_name,
