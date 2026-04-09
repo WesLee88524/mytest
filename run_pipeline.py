@@ -17,6 +17,7 @@ import argparse
 import json
 import logging
 import os
+import subprocess
 import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -299,6 +300,26 @@ def _auto_detect_gpu_devices() -> List[str]:
         return []
 
 
+def _query_gpu_free_gb(gpu_id: str) -> Optional[float]:
+    """
+    查询指定 GPU 可用显存（GiB），失败返回 None。
+    """
+    try:
+        cmd = [
+            "nvidia-smi",
+            f"--id={gpu_id}",
+            "--query-gpu=memory.free",
+            "--format=csv,noheader,nounits",
+        ]
+        out = subprocess.check_output(cmd, text=True).strip().splitlines()
+        if not out:
+            return None
+        free_mb = float(out[0].strip())
+        return free_mb / 1024.0
+    except Exception:
+        return None
+
+
 def _process_sequence_worker(task: dict) -> dict:
     """
     多进程 worker：每个进程独立加载模型并处理一个序列。
@@ -429,6 +450,8 @@ def main():
                         help="VLM 生成最大 token（降显存优先建议 96~192）")
     parser.add_argument("--investigator-max-images", type=int, default=8,
                         help="阶段二每轮最多使用图片数（越小越省显存）")
+    parser.add_argument("--min-gpu-free-gb", type=float, default=32.0,
+                        help="并行前筛选 GPU 的最小空闲显存（GiB）")
     args = parser.parse_args()
     batch_mode = bool(args.frames_root and args.mot_root)
     if batch_mode and args.stage1_json:
@@ -504,6 +527,23 @@ def main():
                     logger.info(f"未显式指定 --gpu-devices，自动探测到 GPU: {gpu_list}")
 
             if gpu_list:
+                usable = []
+                for gid in gpu_list:
+                    free_gb = _query_gpu_free_gb(gid)
+                    if free_gb is None:
+                        usable.append(gid)  # 查询失败时不强行剔除
+                        continue
+                    if free_gb >= args.min_gpu_free_gb:
+                        usable.append(gid)
+                    else:
+                        logger.warning(
+                            "GPU %s 可用显存 %.2f GiB < 阈值 %.2f GiB，跳过该卡",
+                            gid, free_gb, args.min_gpu_free_gb
+                        )
+                gpu_list = usable
+                if not gpu_list:
+                    parser.error("无可用 GPU（空闲显存不足），请降低 --min-gpu-free-gb 或释放显存后重试")
+
                 actual_workers = min(args.num_workers, len(gpu_list))
                 if actual_workers < args.num_workers:
                     logger.warning(

@@ -122,7 +122,7 @@ class QwenVLBackend:
 
         self._processor = AutoProcessor.from_pretrained(
             model_name,
-            use_fast=True,
+            backend="torchvision",
         )
 
         self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
