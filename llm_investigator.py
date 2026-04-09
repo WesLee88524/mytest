@@ -198,18 +198,22 @@ class LLMInvestigator:
             padding=True,
         ).to(self.backend._model.device)
 
+        max_new_tokens = getattr(self.backend, "max_new_tokens", 96)
         with torch.no_grad():
             output_ids = self.backend._model.generate(
                 **inputs,
-                max_new_tokens=300,
+                max_new_tokens=max_new_tokens,
                 do_sample=False,
             )
 
         input_len = inputs["input_ids"].shape[1]
         generated = output_ids[:, input_len:]
-        return self.backend._processor.batch_decode(
+        result = self.backend._processor.batch_decode(
             generated, skip_special_tokens=True
         )[0].strip()
+        del inputs, output_ids, generated
+        torch.cuda.empty_cache()
+        return result
 
     def _sanitize_pil_for_qwen(self, pil_img):
         """
@@ -222,7 +226,7 @@ class LLMInvestigator:
             return pil_img
 
         # 控制最长边
-        max_side = 2048
+        max_side = 560
         if max(w, h) > max_side:
             scale = max_side / float(max(w, h))
             pil_img = pil_img.resize(
