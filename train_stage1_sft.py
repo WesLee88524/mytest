@@ -76,6 +76,43 @@ def load_events(input_path: str) -> List[dict]:
     raise FileNotFoundError(f"input not found: {input_path}")
 
 
+def enrich_image_path_from_root(
+    events: List[dict],
+    image_root: str,
+    image_field: str,
+) -> int:
+    """
+    尝试从 stage1 可视化目录自动回填 image_field。
+    默认按以下模式查找：
+      {image_root}/{seq_name}/stage1/*_track{track_id}_*_{start}_{end}.jpg
+    """
+    if not image_root:
+        return 0
+    filled = 0
+    for ev in events:
+        if ev.get(image_field):
+            continue
+        seq = ev.get("seq_name")
+        tid = ev.get("track_id")
+        fr = ev.get("frame_range", [None, None])
+        if seq is None or tid is None or fr[0] is None or fr[1] is None:
+            continue
+        s, e = fr[0], fr[1]
+        patt_exact = os.path.join(
+            image_root, str(seq), "stage1", f"*_track{tid}_*_{s}_{e}.jpg"
+        )
+        cand = sorted(glob.glob(patt_exact))
+        if not cand:
+            patt_relax = os.path.join(
+                image_root, str(seq), "stage1", f"*_track{tid}_*.jpg"
+            )
+            cand = sorted(glob.glob(patt_relax))
+        if cand:
+            ev[image_field] = cand[0]
+            filled += 1
+    return filled
+
+
 def event_to_example(ev: dict, image_field: str) -> Dict[str, str]:
     anomaly_type = ev.get("anomaly_type", "ok")
     frame_range = ev.get("frame_range", [0, 0])
@@ -203,6 +240,8 @@ def main():
                         help="事件中图像路径字段名（用于 VLM 样本）")
     parser.add_argument("--require-image", action="store_true",
                         help="只保留包含 image-field 的样本")
+    parser.add_argument("--image-root", type=str, default=None,
+                        help="可选：从该目录自动回填图像路径（如 /path/to/viz_root）")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -211,6 +250,14 @@ def main():
     events = load_events(args.input)
     if not events:
         raise RuntimeError("输入事件为空，无法训练")
+
+    if args.image_root:
+        n = enrich_image_path_from_root(
+            events=events,
+            image_root=args.image_root,
+            image_field=args.image_field,
+        )
+        print(f"auto-filled image paths: {n} (field={args.image_field})")
 
     if args.require_image:
         events = [ev for ev in events if ev.get(args.image_field)]
