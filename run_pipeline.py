@@ -324,7 +324,13 @@ def _process_sequence_worker(task: dict) -> dict:
         device = "cuda"
     os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
-    backend = QwenVLBackend(model_name=args_dict["model"], use_ollama=False, device=device)
+    backend = QwenVLBackend(
+        model_name=args_dict["model"],
+        use_ollama=False,
+        device=device,
+        max_new_tokens=args_dict.get("max_new_tokens", 160),
+    )
+    backend.max_investigator_images = args_dict.get("investigator_max_images", 8)
     frames = load_frames(frames_dir)
     tracks = load_mot_result(mot_file)
 
@@ -336,15 +342,42 @@ def _process_sequence_worker(task: dict) -> dict:
     else:
         seq_args.corrected_mot = None
 
-    result = run_single_sequence(
-        seq_name=seq_name,
-        frames=frames,
-        tracks=tracks,
-        backend=backend,
-        args=seq_args,
-        output_path=seq_output,
-        viz_dir=viz_dir,
-    )
+    try:
+        result = run_single_sequence(
+            seq_name=seq_name,
+            frames=frames,
+            tracks=tracks,
+            backend=backend,
+            args=seq_args,
+            output_path=seq_output,
+            viz_dir=viz_dir,
+        )
+    except RuntimeError as e:
+        if "out of memory" not in str(e).lower():
+            raise
+        logger.warning(f"[{seq_name}] 首次运行 OOM，降级参数重试一次")
+        try:
+            import torch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:
+            pass
+        backend = QwenVLBackend(
+            model_name=args_dict["model"],
+            use_ollama=False,
+            device=device,
+            max_new_tokens=max(64, int(args_dict.get("max_new_tokens", 160) * 0.5)),
+        )
+        backend.max_investigator_images = max(4, int(args_dict.get("investigator_max_images", 8) * 0.5))
+        result = run_single_sequence(
+            seq_name=seq_name,
+            frames=frames,
+            tracks=tracks,
+            backend=backend,
+            args=seq_args,
+            output_path=seq_output,
+            viz_dir=viz_dir,
+        )
     return {
         "sequence": seq_name,
         "frames_dir": frames_dir,
@@ -392,6 +425,10 @@ def main():
                         help="可视化输出目录（按 seq_name/stage1|2|3 导出 jpg）")
     parser.add_argument("--only-seq", "--only_seq", dest="only_seq", type=str, default=None,
                         help="仅处理指定序列名（用于快速排查单序列）")
+    parser.add_argument("--max-new-tokens", type=int, default=160,
+                        help="VLM 生成最大 token（降显存优先建议 96~192）")
+    parser.add_argument("--investigator-max-images", type=int, default=8,
+                        help="阶段二每轮最多使用图片数（越小越省显存）")
     args = parser.parse_args()
     batch_mode = bool(args.frames_root and args.mot_root)
     if batch_mode and args.stage1_json:
@@ -423,7 +460,13 @@ def main():
 
         if args.num_workers <= 1:
             logger.info(f"加载模型：{args.model}")
-            backend = QwenVLBackend(model_name=args.model, use_ollama=False, device="cuda")
+            backend = QwenVLBackend(
+                model_name=args.model,
+                use_ollama=False,
+                device="cuda",
+                max_new_tokens=args.max_new_tokens,
+            )
+            backend.max_investigator_images = args.investigator_max_images
             for idx, (seq_name, frames_dir, mot_file) in enumerate(pairs, start=1):
                 logger.info(f"[{idx}/{len(pairs)}] 处理序列 {seq_name}")
                 frames = load_frames(frames_dir)
@@ -524,7 +567,13 @@ def main():
 
     # ── 模型加载（单序列） ──
     logger.info(f"加载模型：{args.model}")
-    backend = QwenVLBackend(model_name=args.model, use_ollama=False, device="cuda")
+    backend = QwenVLBackend(
+        model_name=args.model,
+        use_ollama=False,
+        device="cuda",
+        max_new_tokens=args.max_new_tokens,
+    )
+    backend.max_investigator_images = args.investigator_max_images
 
     # 单序列模式
     if args.demo:
