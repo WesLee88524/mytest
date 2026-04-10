@@ -277,6 +277,7 @@ def main():
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         args.model,
         torch_dtype=torch.bfloat16 if args.bf16 else (torch.float16 if args.fp16 else None),
+        device_map="auto",
     )
     model = maybe_apply_lora(
         model,
