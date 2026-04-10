@@ -34,12 +34,12 @@ from typing import Dict, List
 import torch
 from torch.utils.data import Dataset
 from transformers import (
-    AutoModelForCausalLM,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
     Trainer,
     TrainingArguments,
 )
+from transformers import Qwen2_5_VLForConditionalGeneration
 
 
 SYSTEM_INST = (
@@ -275,7 +275,7 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    model = AutoModelForCausalLM.from_pretrained(
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         args.model,
         torch_dtype=torch.bfloat16 if args.bf16 else (torch.float16 if args.fp16 else None),
     )
