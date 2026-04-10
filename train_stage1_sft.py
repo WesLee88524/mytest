@@ -278,7 +278,7 @@ def main():
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         args.model,
         torch_dtype=torch.bfloat16 if args.bf16 else (torch.float16 if args.fp16 else None),
-    ).to(f"cuda:{local_rank}")
+    )
     model = maybe_apply_lora(
         model,
         use_lora=args.use_lora,
@@ -311,8 +311,8 @@ def main():
         bf16=args.bf16,
         fp16=args.fp16,
         report_to=[],
-        ddp_find_unused_parameters=False,
-        deepspeed="ds_zero3.json",
+        fsdp="full_shard auto_wrap",
+        fsdp_config={"fsdp_transformer_layer_cls_to_wrap": "Qwen2_5_VLDecoderLayer"},
     )
 
     collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
