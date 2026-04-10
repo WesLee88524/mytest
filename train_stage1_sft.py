@@ -312,6 +312,7 @@ def main():
         fp16=args.fp16,
         report_to=[],
         ddp_find_unused_parameters=False,
+        deepspeed="ds_zero3.json",
     )
 
     collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
