@@ -182,7 +182,6 @@ def build_hf_dataset(
                     max_length=max_length,
                     padding=False,
                 )
-                tok["labels"] = tok["input_ids"][:]
                 self.samples.append(tok)
 
         def __len__(self):
