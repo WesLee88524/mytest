@@ -171,7 +171,7 @@ def build_events_for_sequence(
                     "gt_id": gt_id,
                     "track_id": tid,
                     "anomaly_type": "id_switch",
-                    "frame_range": [max(timeline[0][0], fid - 2), fid + 2],
+                    "frame_range": [max(1, fid - 2), fid + 2],
                     "confidence": 0.95,
                     "meta": {"prev_track_id": prev_tid, "iou": round(ov, 4)},
                 })
@@ -219,7 +219,7 @@ def build_events_for_sequence(
                     "meta": {"segments": segs},
                 })
 
-    # 5) false_positive：tracker 连续出现，但无法匹配到任何 GT
+    # 5) false_positive：tracker 连续出现，但无法匹配到任何 GT → 归为 fragment
     for tid, fids in tracker_unmatched_frames.items():
         for s, e in group_consecutive(fids):
             if e - s + 1 < fp_min_len:
@@ -228,13 +228,14 @@ def build_events_for_sequence(
                 "seq_name": seq_name,
                 "gt_id": None,
                 "track_id": tid,
-                "anomaly_type": "false_positive",
+                "anomaly_type": "fragment",
                 "frame_range": [s, e],
                 "confidence": 0.88,
                 "meta": {"length": e - s + 1},
             })
 
     # 6) ok 样本：tracker 轨迹中未命中任何异常帧段的轨迹
+    # 收集所有异常帧段（按 track_id 和 gt 匹配的 tracker id）
     bad_by_tid: Dict[int, List[Tuple[int, int]]] = {}
     for ev in events:
         tid = ev.get("track_id")
@@ -242,13 +243,24 @@ def build_events_for_sequence(
             continue
         bad_by_tid.setdefault(tid, []).append((ev["frame_range"][0], ev["frame_range"][1]))
 
+    # 同时收集 gt 时间线中出现过异常的 tracker id
+    anomaly_gt_ids: set = {ev["gt_id"] for ev in events if ev.get("gt_id") is not None}
+    # gt_id -> set of tracker_ids that covered it
+    gt_to_tids: Dict[int, set] = {}
+    for gt_id, timeline in gt_timeline.items():
+        for _, tid, _ in timeline:
+            if tid is not None:
+                gt_to_tids.setdefault(gt_id, set()).add(tid)
+    # tracker ids involved in any anomalous gt
+    anomaly_tids: set = set()
+    for gt_id in anomaly_gt_ids:
+        anomaly_tids.update(gt_to_tids.get(gt_id, set()))
+
     for tid, fids in tracker_frames.items():
+        if tid in anomaly_tids:
+            continue
         s, e = min(fids), max(fids)
-        has_bad = False
-        for b0, b1 in bad_by_tid.get(tid, []):
-            if max(s, b0) <= min(e, b1):
-                has_bad = True
-                break
+        has_bad = any(max(s, b0) <= min(e, b1) for b0, b1 in bad_by_tid.get(tid, []))
         if not has_bad:
             events.append({
                 "seq_name": seq_name,
