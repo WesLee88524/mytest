@@ -274,11 +274,11 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    local_rank = int(os.environ.get("LOCAL_RANK", 0))
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         args.model,
         torch_dtype=torch.bfloat16 if args.bf16 else (torch.float16 if args.fp16 else None),
-        device_map="auto",
-    )
+    ).to(f"cuda:{local_rank}")
     model = maybe_apply_lora(
         model,
         use_lora=args.use_lora,
@@ -303,7 +303,7 @@ def main():
         gradient_accumulation_steps=args.grad_accum,
         warmup_ratio=args.warmup_ratio,
         weight_decay=args.weight_decay,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         eval_steps=200,
         save_steps=200,
         logging_steps=20,
@@ -311,6 +311,7 @@ def main():
         bf16=args.bf16,
         fp16=args.fp16,
         report_to=[],
+        ddp_find_unused_parameters=False,
     )
 
     collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
