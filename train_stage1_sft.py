@@ -149,7 +149,29 @@ def event_to_example(ev: dict, image_field: str) -> Dict[str, str]:
     return {"prompt": prompt, "answer": answer}
 
 
-def train_val_split(items: List[dict], val_ratio: float, seed: int) -> (List[dict], List[dict]):
+def balance_events(events: List[dict], seed: int, max_ratio: int = 5) -> List[dict]:
+    """
+    对多数类欠采样，使最多类样本数 <= min_class_count * max_ratio。
+    少数类保持不变（不过采样，避免重复样本影响泛化）。
+    """
+    from collections import defaultdict
+    by_type: dict = defaultdict(list)
+    for ev in events:
+        by_type[ev.get("anomaly_type", "ok")].append(ev)
+    min_count = min(len(v) for v in by_type.values())
+    cap = max(min_count * max_ratio, 1)
+    rng = random.Random(seed)
+    result = []
+    for evs in by_type.values():
+        if len(evs) > cap:
+            result.extend(rng.sample(evs, cap))
+        else:
+            result.extend(evs)
+    rng.shuffle(result)
+    return result
+
+
+
     rng = random.Random(seed)
     arr = items[:]
     rng.shuffle(arr)
@@ -265,6 +287,11 @@ def main():
         print(f"after image filter ({args.image_field}): {len(events)}")
     else:
         print("warning: 当前为 text-only SFT baseline；建议后续切换到带图样本训练。")
+
+    events = balance_events(events, seed=args.seed)
+    print(f"after balancing: {len(events)}")
+    from collections import Counter
+    print("class dist:", dict(Counter(ev["anomaly_type"] for ev in events)))
 
     examples = [event_to_example(ev, image_field=args.image_field) for ev in events]
     train_items, val_items = train_val_split(examples, val_ratio=args.val_ratio, seed=args.seed)
