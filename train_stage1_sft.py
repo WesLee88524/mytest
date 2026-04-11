@@ -171,7 +171,7 @@ def balance_events(events: List[dict], seed: int, max_ratio: int = 5) -> List[di
     return result
 
 
-
+def train_val_split(items: List[dict], val_ratio: float, seed: int) -> (List[dict], List[dict]):
     rng = random.Random(seed)
     arr = items[:]
     rng.shuffle(arr)
