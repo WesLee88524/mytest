@@ -235,31 +235,23 @@ def build_events_for_sequence(
             })
 
     # 6) ok 样本：tracker 轨迹中未命中任何异常帧段的轨迹
-    # 收集所有异常帧段（按 track_id 和 gt 匹配的 tracker id）
     bad_by_tid: Dict[int, List[Tuple[int, int]]] = {}
     for ev in events:
         tid = ev.get("track_id")
-        if tid is None:
-            continue
-        bad_by_tid.setdefault(tid, []).append((ev["frame_range"][0], ev["frame_range"][1]))
-
-    # 同时收集 gt 时间线中出现过异常的 tracker id
-    anomaly_gt_ids: set = {ev["gt_id"] for ev in events if ev.get("gt_id") is not None}
-    # gt_id -> set of tracker_ids that covered it
-    gt_to_tids: Dict[int, set] = {}
-    for gt_id, timeline in gt_timeline.items():
-        for _, tid, _ in timeline:
-            if tid is not None:
-                gt_to_tids.setdefault(gt_id, set()).add(tid)
-    # tracker ids involved in any anomalous gt
-    anomaly_tids: set = set()
-    for gt_id in anomaly_gt_ids:
-        anomaly_tids.update(gt_to_tids.get(gt_id, set()))
+        fr = ev["frame_range"]
+        if tid is not None:
+            bad_by_tid.setdefault(tid, []).append((fr[0], fr[1]))
+        else:
+            # miss/drift/fragment 没有 track_id，通过 gt_timeline 反查该帧段内的 tracker id
+            gt_id = ev.get("gt_id")
+            if gt_id is not None and gt_id in gt_timeline:
+                for fid, tid2, _ in gt_timeline[gt_id]:
+                    if tid2 is not None and fr[0] <= fid <= fr[1]:
+                        bad_by_tid.setdefault(tid2, []).append((fr[0], fr[1]))
 
     for tid, fids in tracker_frames.items():
-        if tid in anomaly_tids:
-            continue
         s, e = min(fids), max(fids)
+        # 检查该 tracker 的整个生命周期是否与任何异常帧段重叠
         has_bad = any(max(s, b0) <= min(e, b1) for b0, b1 in bad_by_tid.get(tid, []))
         if not has_bad:
             events.append({

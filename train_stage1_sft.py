@@ -149,24 +149,24 @@ def event_to_example(ev: dict, image_field: str) -> Dict[str, str]:
     return {"prompt": prompt, "answer": answer}
 
 
-def balance_events(events: List[dict], seed: int, max_ratio: int = 5) -> List[dict]:
+def balance_events(events: List[dict], seed: int, target_per_class: int = 1000) -> List[dict]:
     """
-    对多数类欠采样，使最多类样本数 <= min_class_count * max_ratio。
-    少数类保持不变（不过采样，避免重复样本影响泛化）。
+    对少数类过采样（有放回），对多数类欠采样，使每类样本数接近 target_per_class。
     """
     from collections import defaultdict
     by_type: dict = defaultdict(list)
     for ev in events:
         by_type[ev.get("anomaly_type", "ok")].append(ev)
-    min_count = min(len(v) for v in by_type.values())
-    cap = max(min_count * max_ratio, 1)
     rng = random.Random(seed)
     result = []
     for evs in by_type.values():
-        if len(evs) > cap:
-            result.extend(rng.sample(evs, cap))
+        if len(evs) >= target_per_class:
+            result.extend(rng.sample(evs, target_per_class))
         else:
+            # 过采样：先放全部，再有放回补足
             result.extend(evs)
+            extra = target_per_class - len(evs)
+            result.extend(rng.choices(evs, k=extra))
     rng.shuffle(result)
     return result
 
@@ -263,6 +263,8 @@ def main():
                         help="只保留包含 image-field 的样本")
     parser.add_argument("--image-root", type=str, default=None,
                         help="可选：从该目录自动回填图像路径（如 /path/to/viz_root）")
+    parser.add_argument("--target-per-class", type=int, default=1000,
+                        help="均衡后每类目标样本数（过采样/欠采样）")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -288,7 +290,7 @@ def main():
     else:
         print("warning: 当前为 text-only SFT baseline；建议后续切换到带图样本训练。")
 
-    events = balance_events(events, seed=args.seed)
+    events = balance_events(events, seed=args.seed, target_per_class=args.target_per_class)
     print(f"after balancing: {len(events)}")
     from collections import Counter
     print("class dist:", dict(Counter(ev["anomaly_type"] for ev in events)))
