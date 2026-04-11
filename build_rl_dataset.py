@@ -234,34 +234,56 @@ def build_events_for_sequence(
                 "meta": {"length": e - s + 1},
             })
 
-    # 6) ok 样本：tracker 轨迹中未命中任何异常帧段的轨迹
-    bad_by_tid: Dict[int, List[Tuple[int, int]]] = {}
-    for ev in events:
-        tid = ev.get("track_id")
-        fr = ev["frame_range"]
-        if tid is not None:
-            bad_by_tid.setdefault(tid, []).append((fr[0], fr[1]))
-        else:
-            # miss/drift/fragment 没有 track_id，通过 gt_timeline 反查该帧段内的 tracker id
-            gt_id = ev.get("gt_id")
-            if gt_id is not None and gt_id in gt_timeline:
-                for fid, tid2, _ in gt_timeline[gt_id]:
-                    if tid2 is not None and fr[0] <= fid <= fr[1]:
-                        bad_by_tid.setdefault(tid2, []).append((fr[0], fr[1]))
-
-    for tid, fids in tracker_frames.items():
-        s, e = min(fids), max(fids)
-        # 检查该 tracker 的整个生命周期是否与任何异常帧段重叠
-        has_bad = any(max(s, b0) <= min(e, b1) for b0, b1 in bad_by_tid.get(tid, []))
-        if not has_bad:
+    # 6) ok 样本：从 gt_timeline 正向提取"连续稳定跟踪"片段
+    # 条件：连续帧内同一 tracker id 且 IoU >= iou_match_thr，长度 >= ok_min_len
+    ok_min_len = 10
+    for gt_id, timeline in gt_timeline.items():
+        # 按连续段分组：同一 tid 且 IoU 达标
+        seg_start = None
+        seg_tid = None
+        seg_frames = []
+        for fid, tid, ov in timeline:
+            if tid is not None and ov >= iou_match_thr:
+                if tid == seg_tid:
+                    seg_frames.append(fid)
+                else:
+                    # 新 tid，先保存上一段
+                    if seg_frames and len(seg_frames) >= ok_min_len:
+                        events.append({
+                            "seq_name": seq_name,
+                            "gt_id": gt_id,
+                            "track_id": seg_tid,
+                            "anomaly_type": "ok",
+                            "frame_range": [seg_frames[0], seg_frames[-1]],
+                            "confidence": 0.90,
+                            "meta": {"source": "gt_stable", "length": len(seg_frames)},
+                        })
+                    seg_tid = tid
+                    seg_frames = [fid]
+            else:
+                # 中断，保存当前段
+                if seg_frames and len(seg_frames) >= ok_min_len:
+                    events.append({
+                        "seq_name": seq_name,
+                        "gt_id": gt_id,
+                        "track_id": seg_tid,
+                        "anomaly_type": "ok",
+                        "frame_range": [seg_frames[0], seg_frames[-1]],
+                        "confidence": 0.90,
+                        "meta": {"source": "gt_stable", "length": len(seg_frames)},
+                    })
+                seg_tid = None
+                seg_frames = []
+        # 收尾
+        if seg_frames and len(seg_frames) >= ok_min_len:
             events.append({
                 "seq_name": seq_name,
-                "gt_id": None,
-                "track_id": tid,
+                "gt_id": gt_id,
+                "track_id": seg_tid,
                 "anomaly_type": "ok",
-                "frame_range": [s, e],
-                "confidence": 0.60,
-                "meta": {"source": "auto_ok"},
+                "frame_range": [seg_frames[0], seg_frames[-1]],
+                "confidence": 0.90,
+                "meta": {"source": "gt_stable", "length": len(seg_frames)},
             })
 
     return events
