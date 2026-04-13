@@ -124,6 +124,7 @@ def build_events_for_sequence(
     """
     产出事件级样本（可用于阶段一训练）：
       - id_switch / miss / drift / fragment / false_positive / ok
+    注：drift 条件为 drift_iou_thr <= IoU < iou_match_thr（匹配上但质量差）
     """
     all_frames = sorted(set(gt_by_frame.keys()) | set(trk_by_frame.keys()))
     if not all_frames:
@@ -191,8 +192,8 @@ def build_events_for_sequence(
                     "meta": {"length": e - s + 1},
                 })
 
-        # 3) drift：匹配到了 tracker 但 IoU 很低
-        drift_frames = [fid for fid, tid, ov in timeline if (tid is not None and ov < drift_iou_thr)]
+        # 3) drift：匹配到了 tracker 但 IoU 低于匹配阈值的一半（质量差但未丢失）
+        drift_frames = [fid for fid, tid, ov in timeline if (tid is not None and ov < iou_match_thr and ov >= drift_iou_thr)]
         for s, e in group_consecutive(drift_frames):
             events.append({
                 "seq_name": seq_name,
@@ -219,7 +220,7 @@ def build_events_for_sequence(
                     "meta": {"segments": segs},
                 })
 
-    # 5) false_positive：tracker 连续出现，但无法匹配到任何 GT → 归为 fragment
+    # 5) false_positive：tracker 连续出现，但无法匹配到任何 GT
     for tid, fids in tracker_unmatched_frames.items():
         for s, e in group_consecutive(fids):
             if e - s + 1 < fp_min_len:
@@ -228,7 +229,7 @@ def build_events_for_sequence(
                 "seq_name": seq_name,
                 "gt_id": None,
                 "track_id": tid,
-                "anomaly_type": "fragment",
+                "anomaly_type": "false_positive",
                 "frame_range": [s, e],
                 "confidence": 0.88,
                 "meta": {"length": e - s + 1},
