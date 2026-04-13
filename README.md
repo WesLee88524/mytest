@@ -92,3 +92,39 @@ VLM 同时接收文本形式的数值特征：
 
 `InspectionReport.suspicious` 列表直接传入阶段二（LLM 工具调用调查器），
 每个 `Suspicion` 提供：`track_id`、`anomaly_type`、`frame_range`、`confidence`。
+
+## 训练/评估数据切分（避免 val 泄漏）
+
+如果你当前用 `DanceTrack val` 同时做训练和评估，会导致指标失真（数据泄漏）。
+建议先把 `stage1_events_val` 切成 `train/val`：
+
+```bash
+python split_stage1_events.py \
+  --input ./stage1_events_val \
+  --train-output ./stage1_events_val_train \
+  --val-output ./stage1_events_val_holdout \
+  --split-by seq \
+  --val-ratio 0.2 \
+  --seed 42
+```
+
+然后训练和评估分开使用：
+
+```bash
+# 训练只用 train 子集
+nohup torchrun --nproc_per_node=4 train_stage1_sft.py \
+  --input ./stage1_events_val_train \
+  --model /public/home/lyh_npu/models/Qwen2.5-VL-7B-Instruct \
+  --output-dir exps/val_v2 \
+  --use-lora --bf16 \
+  --image-field contact_sheet_path \
+  --image-root ./viz_val \
+  --require-image \
+  --epochs 3 > log/val_train_stage1_sft2.log 2>&1 &
+
+# 评估只用 holdout 子集
+python eval_stage1_detector.py \
+  --model exps/val_v2 \
+  --input ./stage1_events_val_holdout \
+  --output eval_results_holdout.json
+```
